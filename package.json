@@ -12,7 +12,7 @@
     "axios": "^1.2.2",
     "immer": "^9.0.17",
     "normalizr": "^3.6.2",
-    "react": "^18.2.0",
+    "react": "^18.3.1",
     "react-dom": "^18.2.0",
     "react-icons": "^4.7.1",
     "react-redux": "^8.0.5",
