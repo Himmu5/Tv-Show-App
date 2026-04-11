@@ -7,7 +7,7 @@ import ShowListPage from "./Pages/ShowsList.Page";
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-surface">
         <NavBar />
         <Routes>
           <Route path="/" element={<ShowListPage />} />

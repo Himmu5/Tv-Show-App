@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { connect, ConnectedProps } from "react-redux";
-import { Link, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { peopleQueryChangeAction, queryChangeAction } from "../Redux/Action";
 import {
   loadingSelector,
@@ -9,10 +9,16 @@ import {
   querySelector,
 } from "../Redux/Selector/shows";
 import { State } from "../Redux/Store";
-import LoadingSpinner from "./LoadingSpinner";
 import SearchBar from "./SearchBar";
 
 type P = ReduxProps;
+
+const navClass = ({ isActive }: { isActive: boolean }) =>
+  `rounded-full px-3.5 py-2 text-sm font-semibold tracking-tight transition-all duration-250 ease-crisp ${
+    isActive
+      ? "bg-white/[0.14] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] ring-1 ring-white/[0.12]"
+      : "text-zinc-400 hover:bg-white/[0.07] hover:text-white"
+  }`;
 
 const NavBar: FC<P> = ({
   query,
@@ -27,57 +33,49 @@ const NavBar: FC<P> = ({
   const searchLoading = isPeople ? peopleLoading : loading;
 
   return (
-    <header className="nav-shell fixed inset-x-0 top-0 z-50 transition-colors duration-300">
-      <div className="nav-inner mx-auto flex h-14 items-center gap-3 px-4 sm:h-16 sm:gap-4 sm:px-6 lg:px-10">
+    <header className="nav-shell fixed inset-x-0 top-0 z-50">
+      <div className="nav-inner mx-auto flex h-[3.35rem] max-w-[1600px] items-center gap-2 px-3 sm:h-[3.75rem] sm:gap-4 sm:px-6 lg:gap-6 lg:px-10">
         <Link
           to="/"
-          className="shrink-0 font-display text-2xl font-extrabold tracking-tight text-white sm:text-3xl"
+          className="group shrink-0 font-display text-[1.35rem] font-extrabold leading-none tracking-tight text-white drop-shadow-[0_0_24px_rgba(229,9,20,0.25)] transition sm:text-[1.65rem]"
           aria-label="Home"
         >
-          <span className="text-brand">TV</span>
-          <span className="font-normal opacity-90">flix</span>
+          <span className="bg-gradient-to-br from-brand-bright to-brand bg-clip-text text-transparent transition group-hover:from-white group-hover:to-zinc-300">
+            TV
+          </span>
+          <span className="text-zinc-200 transition group-hover:text-white">
+            flix
+          </span>
         </Link>
         <nav
-          className="hidden shrink-0 items-center gap-5 text-sm font-semibold text-zinc-500 sm:flex"
+          className="hidden shrink-0 items-center gap-1.5 sm:flex"
           aria-label="Main"
         >
-          <Link
-            to="/"
-            className={`transition hover:text-white ${
-              location.pathname === "/" ? "text-white" : ""
-            }`}
-          >
+          <NavLink to="/" end className={navClass}>
             Browse
-          </Link>
-          <Link
-            to="/people"
-            className={`transition hover:text-white ${
-              isPeople ? "text-white" : ""
-            }`}
-          >
+          </NavLink>
+          <NavLink to="/people" className={navClass}>
             People
-          </Link>
+          </NavLink>
         </nav>
-        <div className="relative min-w-0 flex-1 max-w-xl">
-          <SearchBar
-            value={isPeople ? peopleQuery : query}
-            onChange={(e) =>
-              isPeople
-                ? changePeopleQuery(e.target.value)
-                : changeQuery(e.target.value)
-            }
-            placeholder={
-              isPeople
-                ? "Search actors, hosts, directors…"
-                : "Titles, genres, keywords…"
-            }
-            aria-label={isPeople ? "Search people" : "Search shows"}
-          />
-          {searchLoading && (
-            <span className="pointer-events-none absolute right-12 top-1/2 -translate-y-1/2 text-brand">
-              <LoadingSpinner className="h-5 w-5" />
-            </span>
-          )}
+        <div className="relative min-w-0 flex-1 lg:flex lg:justify-center">
+          <div className="w-full lg:max-w-2xl xl:max-w-3xl">
+            <SearchBar
+              busy={searchLoading}
+              value={isPeople ? peopleQuery : query}
+              onChange={(e) =>
+                isPeople
+                  ? changePeopleQuery(e.target.value)
+                  : changeQuery(e.target.value)
+              }
+              placeholder={
+                isPeople
+                  ? "Actors, hosts, directors…"
+                  : "Search titles, genres, or keywords"
+              }
+              aria-label={isPeople ? "Search people" : "Search shows"}
+            />
+          </div>
         </div>
       </div>
     </header>

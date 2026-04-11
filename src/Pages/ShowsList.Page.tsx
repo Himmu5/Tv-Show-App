@@ -1,7 +1,8 @@
 import { FC, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { connect, ConnectedProps } from "react-redux/es/exports";
-import LoadingSpinner from "../Components/LoadingSpinner";
+import SectionHeading from "../Components/SectionHeading";
+import { HomeRailsSkeleton, SearchRailSkeleton } from "../Components/Skeletons";
 import ScheduleShowCard from "../Components/ScheduleShowCard";
 import ShowCard from "../Components/ShowCard";
 import TVmazeCredit from "../Components/TVmazeCredit";
@@ -53,91 +54,81 @@ const ShowListPage: FC<P> = ({
   }, [trimmed, fetchHomeFeed]);
 
   return (
-    <div className="min-h-screen bg-black pb-16">
-      <section className="relative min-h-[52vh] w-full overflow-hidden sm:min-h-[58vh]">
+    <div className="min-h-screen bg-surface pb-20">
+      <section className="relative min-h-[54vh] w-full overflow-hidden sm:min-h-[60vh]">
         {hasResults && featured ? (
           <>
             <img
               src={heroBackdrop(featured)}
               alt=""
-              className="absolute inset-0 h-full w-full object-cover object-top opacity-60"
+              className="absolute inset-0 h-full w-full scale-105 object-cover object-top opacity-[0.55]"
             />
             <div className="absolute inset-0 bg-hero-vignette" />
-            <div className="safe-pad-top relative flex min-h-[52vh] flex-col justify-end px-4 pb-10 pt-24 sm:min-h-[58vh] sm:px-6 lg:px-10">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-                Top pick for you
-              </p>
-              <h1 className="max-w-3xl font-display text-5xl font-extrabold leading-none tracking-tight text-white sm:text-6xl md:text-7xl">
+            <div className="safe-pad-top relative flex min-h-[54vh] flex-col justify-end px-4 pb-12 pt-24 sm:min-h-[60vh] sm:px-6 lg:px-10">
+              <p className="section-label mb-3">Top pick for you</p>
+              <h1 className="max-w-4xl text-balance font-display text-5xl font-extrabold leading-[0.95] tracking-tight text-white sm:text-6xl md:text-7xl md:leading-[0.92]">
                 {featured.name}
               </h1>
-              <p className="mt-4 max-w-xl text-sm leading-relaxed text-zinc-300 sm:text-base">
+              <p className="mt-5 max-w-xl text-pretty text-[15px] leading-relaxed text-zinc-300 sm:text-base">
                 {stripHtml(featured.summary) ||
-                  "Open the title for synopsis and cast."}
+                  "Open the title for synopsis, episodes, and cast."}
               </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link
-                  to={`/show/${featured.id}`}
-                  className="inline-flex items-center justify-center rounded-md bg-white px-6 py-2.5 text-sm font-semibold text-black transition hover:bg-zinc-200"
-                >
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link to={`/show/${featured.id}`} className="btn-primary">
                   More info
                 </Link>
               </div>
             </div>
           </>
         ) : (
-          <div className="safe-pad-top relative flex min-h-[52vh] flex-col justify-center px-4 sm:min-h-[58vh] sm:px-6 lg:px-10">
-            <div className="absolute inset-0 bg-gradient-to-b from-zinc-900 via-black to-black" />
+          <div className="safe-pad-top relative flex min-h-[54vh] flex-col justify-center px-4 sm:min-h-[60vh] sm:px-6 lg:px-10">
+            <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-surface to-surface" />
+            <div
+              className="absolute inset-0 bg-mesh-landing opacity-90"
+              aria-hidden
+            />
             <div className="relative max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-                Unlimited discovery
-              </p>
-              <h1 className="mt-3 font-display text-5xl font-extrabold tracking-tight text-white sm:text-6xl md:text-7xl">
+              <p className="section-label">Unlimited discovery</p>
+              <h1 className="mt-4 text-balance font-display text-5xl font-extrabold tracking-tight text-white sm:text-6xl md:text-7xl">
                 Find your next binge
               </h1>
-              <p className="mt-4 text-lg text-zinc-400">
-                Search shows, browse what&apos;s on TV and streaming today, or
-                explore the catalog—powered by the{" "}
-                <a
-                  href="https://www.tvmaze.com/api"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-zinc-300 underline decoration-white/20 underline-offset-2 hover:text-white"
-                >
-                  TVmaze API
-                </a>
-                .
+              <p className="mt-5 text-pretty text-lg leading-relaxed text-zinc-400 sm:text-xl">
+                Search shows, see what&apos;s on TV and streaming today, or
+                browse the catalog—data from TVmaze.
               </p>
             </div>
           </div>
         )}
       </section>
 
-      <div className="relative z-10 -mt-8 px-4 sm:px-6 lg:px-10">
+      <div className="relative z-10 -mt-10 px-4 sm:px-6 lg:px-10">
         {loading && !hasResults && trimmed && (
-          <div className="flex min-h-[40vh] items-center justify-center">
-            <LoadingSpinner className="h-10 w-10 text-brand" />
+          <div className="min-h-[36vh] py-6">
+            <SearchRailSkeleton />
           </div>
         )}
 
         {noMatches && (
-          <div className="rounded-lg border border-white/10 bg-surface/80 px-6 py-16 text-center backdrop-blur-sm">
-            <p className="text-xl font-semibold text-white">No matches found</p>
-            <p className="mt-2 text-zinc-400">
-              Try another title, spelling, or broader keyword.
+          <div className="panel-glass px-8 py-16 text-center">
+            <p className="text-xl font-bold tracking-tight text-white">
+              No matches found
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-zinc-400">
+              Try another title, spelling, or a shorter keyword.
             </p>
           </div>
         )}
 
         {hasResults && (
-          <section className="mt-4">
-            <div className="mb-3 flex items-end justify-between gap-4">
-              <h2 className="text-lg font-semibold text-white sm:text-xl">
-                {trimmed ? `Results for “${trimmed}”` : "Browse"}
-              </h2>
-              <span className="text-sm text-zinc-500">
-                {shows.length} title{shows.length === 1 ? "" : "s"}
-              </span>
-            </div>
+          <section className="mt-2">
+            <SectionHeading
+              title={trimmed ? `Results for “${trimmed}”` : "Browse"}
+              aside={
+                <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-zinc-400">
+                  {shows.length} title{shows.length === 1 ? "" : "s"}
+                </span>
+              }
+            />
             <div className="row-scroll -mx-1 px-1">
               {shows.map((s) => (
                 <ShowCard key={s.id} Show={s} />
@@ -147,15 +138,11 @@ const ShowListPage: FC<P> = ({
         )}
 
         {!trimmed && (
-          <div className="mt-10 space-y-10">
-            {homeFeed.loading && (
-              <div className="flex justify-center py-12">
-                <LoadingSpinner className="h-10 w-10 text-brand" />
-              </div>
-            )}
+          <div className="mt-12 space-y-14 sm:space-y-16">
+            {homeFeed.loading && <HomeRailsSkeleton />}
 
             {homeFeed.error && (
-              <div className="rounded-lg border border-brand/30 bg-brand/10 px-4 py-4 text-center text-sm text-red-200">
+              <div className="panel-glass border-red-500/20 bg-red-950/20 px-5 py-5 text-center text-sm text-red-200/90">
                 {homeFeed.error}
               </div>
             )}
@@ -163,14 +150,10 @@ const ShowListPage: FC<P> = ({
             {!homeFeed.loading && !homeFeed.error && (
               <>
                 <section>
-                  <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
-                    <h2 className="text-lg font-semibold text-white sm:text-xl">
-                      On TV today (US)
-                    </h2>
-                    <span className="text-xs text-zinc-500 sm:text-sm">
-                      {scheduleDateLabel()}
-                    </span>
-                  </div>
+                  <SectionHeading
+                    title="On TV today (US)"
+                    aside={scheduleDateLabel()}
+                  />
                   {homeFeed.tvRows.length === 0 ? (
                     <p className="text-sm text-zinc-500">
                       No US network airings listed for this date in TVmaze.
@@ -185,14 +168,10 @@ const ShowListPage: FC<P> = ({
                 </section>
 
                 <section>
-                  <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
-                    <h2 className="text-lg font-semibold text-white sm:text-xl">
-                      Streaming on the web today
-                    </h2>
-                    <span className="text-xs text-zinc-500 sm:text-sm">
-                      Global & web channels
-                    </span>
-                  </div>
+                  <SectionHeading
+                    title="Streaming on the web today"
+                    aside="Global & web channels"
+                  />
                   {homeFeed.webRows.length === 0 ? (
                     <p className="text-sm text-zinc-500">
                       No web-channel episodes for this date.
@@ -210,14 +189,10 @@ const ShowListPage: FC<P> = ({
                 </section>
 
                 <section>
-                  <div className="mb-3 flex items-end justify-between gap-4">
-                    <h2 className="text-lg font-semibold text-white sm:text-xl">
-                      Discover
-                    </h2>
-                    <span className="text-sm text-zinc-500">
-                      From the show index (page 0)
-                    </span>
-                  </div>
+                  <SectionHeading
+                    title="Discover"
+                    aside="Show index · page 0"
+                  />
                   {discoverShows.length === 0 ? (
                     <p className="text-sm text-zinc-500">
                       Catalog preview unavailable.
@@ -235,7 +210,7 @@ const ShowListPage: FC<P> = ({
           </div>
         )}
 
-        <div className="mt-16">
+        <div className="mt-20">
           <TVmazeCredit />
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { connect, ConnectedProps } from "react-redux";
-import LoadingSpinner from "../Components/LoadingSpinner";
+import { PeopleGridSkeleton } from "../Components/Skeletons";
 import TVmazeCredit from "../Components/TVmazeCredit";
 import { placeholderImage } from "../Components/ShowCard";
 import {
@@ -17,56 +17,69 @@ const PeopleSearchPage: FC<P> = ({ query, results, loading }) => {
   const noHits = trimmed && !loading && results.length === 0;
 
   return (
-    <div className="min-h-screen bg-black pb-8">
-      <div className="safe-pad-top px-4 pt-8 sm:px-6 lg:px-10">
-        <h1 className="font-display text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-          People
-        </h1>
-        <p className="mt-2 max-w-2xl text-zinc-400">
-          Search actors and crew in the TVmaze database. Profile links open on{" "}
-          <span className="text-zinc-300">tvmaze.com</span>.
-        </p>
+    <div className="min-h-screen bg-surface pb-8">
+      <div className="safe-pad-top relative px-4 pt-10 sm:px-6 lg:px-10">
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-mesh-landing opacity-60"
+          aria-hidden
+        />
+        <div className="relative">
+          <p className="section-label">Directory</p>
+          <h1 className="mt-3 text-balance font-display text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+            People
+          </h1>
+          <div className="mt-3 h-1 w-16 rounded-full bg-gradient-to-r from-brand to-transparent shadow-glow" />
+          <p className="mt-6 max-w-2xl text-pretty text-base leading-relaxed text-zinc-400">
+            Search actors and crew in the TVmaze database. Opening a card takes
+            you to their profile on{" "}
+            <span className="font-medium text-zinc-300">tvmaze.com</span>.
+          </p>
+        </div>
 
-        {loading && (
-          <div className="mt-12 flex justify-center">
-            <LoadingSpinner className="h-10 w-10 text-brand" />
+        {loading && <PeopleGridSkeleton />}
+
+        {noHits && (
+          <div className="panel-glass mt-12 px-8 py-12 text-center">
+            <p className="text-lg font-bold text-white">No people found</p>
+            <p className="mt-3 text-sm leading-relaxed text-zinc-400">
+              No matches for &ldquo;{trimmed}&rdquo;. Try another spelling or a
+              shorter name.
+            </p>
           </div>
         )}
 
-        {noHits && (
-          <p className="mt-10 rounded-lg border border-white/10 bg-surface/80 px-6 py-8 text-center text-zinc-400 backdrop-blur-sm">
-            No people matched “{trimmed}”. Try another spelling or a shorter name.
-          </p>
-        )}
-
         {!trimmed && !loading && (
-          <p className="mt-10 text-center text-zinc-500">
-            Type in the search bar above to find people.
+          <p className="mt-14 text-center text-sm font-medium text-zinc-500">
+            Use the search bar above to find people.
           </p>
         )}
 
         {results.length > 0 && (
-          <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <ul className="relative mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {results.map(({ person, score }) => (
               <li key={person.id}>
                 <a
                   href={person.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex gap-4 rounded-lg border border-white/10 bg-surface-elevated/80 p-4 transition hover:border-white/20 hover:bg-surface-elevated"
+                  className="group flex gap-4 rounded-2xl border border-white/[0.08] bg-surface-card/90 p-4 shadow-card transition-all duration-400 ease-crisp hover:-translate-y-0.5 hover:shadow-card-hover"
                 >
-                  <img
-                    src={person.image?.medium || placeholderImage}
-                    alt=""
-                    className="h-24 w-16 shrink-0 rounded object-cover object-top"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-white">{person.name}</p>
-                    <p className="mt-1 text-xs text-zinc-500">
-                      Match score {Math.round(score * 100) / 100}
+                  <div className="relative shrink-0 overflow-hidden rounded-lg transition duration-400">
+                    <img
+                      src={person.image?.medium || placeholderImage}
+                      alt=""
+                      className="h-28 w-[4.5rem] object-cover object-top transition duration-500 group-hover:scale-105 sm:h-32 sm:w-20"
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1 py-0.5">
+                    <p className="font-bold leading-snug text-white transition group-hover:text-brand-bright">
+                      {person.name}
                     </p>
-                    <p className="mt-2 text-xs font-medium text-brand">
-                      View on TVmaze →
+                    <p className="mt-1.5 text-[11px] font-medium tabular-nums text-zinc-600">
+                      Score {Math.round(score * 100) / 100}
+                    </p>
+                    <p className="mt-3 text-xs font-bold uppercase tracking-wider text-brand">
+                      TVmaze →
                     </p>
                   </div>
                 </a>
@@ -75,7 +88,7 @@ const PeopleSearchPage: FC<P> = ({ query, results, loading }) => {
           </ul>
         )}
       </div>
-      <div className="mt-16">
+      <div className="mt-20">
         <TVmazeCredit />
       </div>
     </div>

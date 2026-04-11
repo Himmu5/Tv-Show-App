@@ -3,14 +3,31 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Mirrors tailwind theme — single reference for native overrides */
+    --theme-surface: #0c0c0c;
+    --theme-surface-elevated: #141414;
+    --theme-surface-card: #1a1a1a;
+    --theme-muted: #808080;
+    --theme-brand: #e50914;
+  }
   html {
     @apply scroll-smooth antialiased;
   }
   body {
-    @apply min-h-screen bg-black font-sans text-zinc-100;
+    @apply min-h-screen bg-surface font-sans text-zinc-100;
+    text-rendering: optimizeLegibility;
   }
   #root {
     @apply min-h-screen;
+  }
+  ::selection {
+    background-color: rgba(229, 9, 20, 0.35);
+    color: #fff;
+  }
+  :focus-visible {
+    outline: 2px solid rgba(229, 9, 20, 0.75);
+    outline-offset: 2px;
   }
 }
 
@@ -18,32 +35,128 @@
   .nav-shell {
     background: linear-gradient(
       180deg,
-      rgba(0, 0, 0, 0.92) 0%,
-      rgba(0, 0, 0, 0.65) 55%,
+      rgba(0, 0, 0, 0.97) 0%,
+      rgba(0, 0, 0, 0.82) 40%,
+      rgba(0, 0, 0, 0.45) 78%,
       transparent 100%
     );
   }
   .nav-inner {
-    @apply border-b border-white/5;
-    background: rgba(20, 20, 20, 0.55);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(10, 10, 10, 0.72);
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
   .row-scroll {
-    @apply flex gap-2 overflow-x-auto pb-4 pt-1 sm:gap-3;
+    @apply flex gap-3 overflow-x-auto pb-5 pt-2 sm:gap-4;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      black 12px,
+      black calc(100% - 12px),
+      transparent
+    );
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent,
+      black 12px,
+      black calc(100% - 12px),
+      transparent
+    );
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+  }
+  .row-scroll > * {
+    scroll-snap-align: start;
   }
   .row-scroll::-webkit-scrollbar {
-    height: 6px;
+    height: 5px;
   }
   .row-scroll::-webkit-scrollbar-track {
-    background: transparent;
+    @apply rounded-full;
+    background: rgba(255, 255, 255, 0.04);
   }
   .row-scroll::-webkit-scrollbar-thumb {
-    @apply rounded-full bg-white/20;
+    @apply rounded-full transition-colors;
+    background: rgba(255, 255, 255, 0.2);
+  }
+  .row-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  /* Posters: no ring/border on hover—only lift + shadow */
+  .poster-card {
+    @apply relative z-0 block shrink-0 overflow-hidden rounded-xl bg-surface-card shadow-card;
+    @apply transition-all duration-400 ease-crisp;
+    @apply hover:-translate-y-1 hover:scale-[1.04] hover:shadow-card-hover hover:z-20;
+  }
+  .poster-card:focus-visible {
+    outline: 2px solid rgba(229, 9, 20, 0.85);
+    outline-offset: 3px;
+  }
+
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: #18181b;
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.09),
+      transparent
+    );
+    animation: skeleton-wave 1.35s ease-in-out infinite;
+  }
+
+  .section-label {
+    @apply inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-brand;
+  }
+  .section-label::before {
+    content: "";
+    @apply h-px w-6 rounded-full bg-gradient-to-r from-brand to-transparent;
+  }
+
+  .panel-glass {
+    @apply rounded-2xl shadow-inner-glow backdrop-blur-md;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(20, 20, 20, 0.92);
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-white px-7 py-3 text-sm font-bold tracking-wide text-black shadow-glow;
+    @apply transition-all duration-250 ease-crisp hover:scale-[1.02] hover:bg-zinc-100 hover:shadow-lg active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-zinc-200 backdrop-blur-sm;
+    @apply transition-all duration-250 ease-crisp hover:text-white;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .btn-ghost:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Search field: keep Chrome/Safari autofill on-theme (same as surface-card / elevated) */
+  .search-input-theme:-webkit-autofill,
+  .search-input-theme:-webkit-autofill:hover {
+    -webkit-text-fill-color: #f4f4f5;
+    box-shadow: inset 0 0 0 100px var(--theme-surface-card);
+    transition: background-color 99999s ease-out 0s;
+  }
+  .search-input-theme:-webkit-autofill:focus {
+    -webkit-text-fill-color: #f4f4f5;
+    box-shadow: inset 0 0 0 100px var(--theme-surface-elevated);
   }
 }
 
@@ -56,7 +169,6 @@
       padding-top: 4rem;
     }
   }
-  /* Tailwind 3.2.x — line-clamp ships in 3.3+ */
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -68,5 +180,26 @@
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+}
+
+@keyframes skeleton-wave {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
   }
 }

@@ -8,16 +8,16 @@ const CastCard = ({
   name: string;
 }) => {
   return (
-    <div className="w-28 shrink-0 sm:w-32">
-      <div className="overflow-hidden rounded-md bg-zinc-900 shadow-card ring-1 ring-white/10">
+    <div className="w-[7.25rem] shrink-0 sm:w-32">
+      <div className="overflow-hidden rounded-xl bg-zinc-950 shadow-card transition duration-300 ease-crisp">
         <img
-          className="aspect-[2/3] w-full object-cover"
+          className="aspect-[2/3] w-full object-cover transition duration-500 ease-crisp hover:scale-105"
           src={avatarLink}
           alt=""
           loading="lazy"
         />
       </div>
-      <p className="mt-2 line-clamp-2 text-center text-xs font-medium text-zinc-300">
+      <p className="mt-2.5 line-clamp-2 text-center text-[11px] font-semibold leading-snug text-zinc-300 sm:text-xs">
         {name}
       </p>
     </div>

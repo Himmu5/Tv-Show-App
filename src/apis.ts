@@ -34,7 +34,7 @@ export async function getShowEpisodes(showId: string): Promise<Episode[]> {
   return data;
 }
 
-/** US network / local TV schedule for a calendar day. See https://www.tvmaze.com/api#schedule */
+/** US network / local TV schedule for a calendar day */
 export async function getTvSchedule(
   country: string,
   date: string
@@ -51,13 +51,13 @@ export async function getWebSchedule(date: string): Promise<unknown[]> {
   return data;
 }
 
-/** Paginated show index (max 250 per page). See https://www.tvmaze.com/api#show-index */
+/** Paginated show index (max 250 per page) */
 export async function getShowsPage(page: number): Promise<Show[]> {
   const { data } = await client.get<Show[]>("/shows", { params: { page } });
   return data;
 }
 
-/** People search. See https://www.tvmaze.com/api#people-search */
+/** People search */
 export async function searchPeopleApi(query: string): Promise<PersonSearchHit[]> {
   if (!query.trim()) return [];
   const { data } = await client.get<PersonSearchHit[]>("/search/people", {
