@@ -32,6 +32,13 @@
 }
 
 @layer components {
+  /** Break out of horizontal page padding to span the viewport (cast rails, etc.). */
+  .viewport-bleed-x {
+    width: 100vw;
+    max-width: 100vw;
+    margin-left: calc(50% - 50vw);
+  }
+
   .nav-shell {
     background: linear-gradient(
       180deg,

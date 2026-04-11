@@ -1,7 +1,12 @@
 import produce from "immer";
 import { normalize, schema } from "normalizr";
 import { AnyAction } from "redux";
-import { Cast, CastShow, showCastType } from "../../Models/Cast";
+import {
+  CastMember,
+  CastShow,
+  showCastType,
+  ShowWithEmbeddedCast,
+} from "../../Models/Cast";
 import { Episode } from "../../Models/episode";
 import { PersonSearchHit } from "../../Models/personSearch";
 import { ScheduleRailItem } from "../../Models/schedule";
@@ -126,11 +131,19 @@ export function showReducer(
       });
     case CAST_LOADED:
       return produce(showState, (draft) => {
-        let data = action.payload._embedded.cast;
-        let personEntity = new schema.Entity("person");
-        let castEntity = new schema.Entity("cast", { person: personEntity });
-        let NormalizedCast = normalize(data, [castEntity]);
-        draft.cast = {...draft.cast , [action.payload.id] : NormalizedCast.entities.person! } || {};
+        const payload = action.payload as ShowWithEmbeddedCast;
+        const rows = payload._embedded?.cast ?? [];
+        const byPersonId: { [id: number]: CastMember } = {};
+        for (const row of rows) {
+          const p = row.person;
+          if (p?.id == null) continue;
+          const name = row.character?.name?.trim();
+          byPersonId[p.id] = {
+            ...p,
+            ...(name ? { characterName: name } : {}),
+          };
+        }
+        draft.cast = { ...draft.cast, [payload.id]: byPersonId };
         draft.loading = false;
       });
 

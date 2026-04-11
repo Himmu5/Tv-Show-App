@@ -2,7 +2,8 @@ import { FC } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { PeopleGridSkeleton } from "../Components/Skeletons";
 import TVmazeCredit from "../Components/TVmazeCredit";
-import { placeholderImage } from "../Components/ShowCard";
+import SafeImage from "../Components/SafeImage";
+import { placeholderImage } from "../lib/imageFallback";
 import {
   peopleLoadingSelector,
   peopleQuerySelector,
@@ -65,8 +66,10 @@ const PeopleSearchPage: FC<P> = ({ query, results, loading }) => {
                   className="group flex gap-4 rounded-2xl border border-white/[0.08] bg-surface-card/90 p-4 shadow-card transition-all duration-400 ease-crisp hover:-translate-y-0.5 hover:shadow-card-hover"
                 >
                   <div className="relative shrink-0 overflow-hidden rounded-lg transition duration-400">
-                    <img
-                      src={person.image?.medium || placeholderImage}
+                    <SafeImage
+                      src={person.image?.medium || ""}
+                      fallbackSrc={placeholderImage}
+                      fallbackVariant="person"
                       alt=""
                       className="h-28 w-[4.5rem] object-cover object-top transition duration-500 group-hover:scale-105 sm:h-32 sm:w-20"
                     />

@@ -17,13 +17,14 @@ import {
 import { State } from "../Redux/Store";
 import { Show } from "../Models/showType";
 import { stripHtml } from "../lib/stripHtml";
-import { placeholderImage } from "../Components/ShowCard";
+import SafeImage from "../Components/SafeImage";
+import { placeholderImage } from "../lib/imageFallback";
 
 type P = {} & ReduxProps;
 
 function heroBackdrop(show: Show | undefined): string {
   if (!show) return "";
-  return show.image?.original || show.image?.medium || placeholderImage;
+  return show.image?.original || show.image?.medium || "";
 }
 
 function scheduleDateLabel(): string {
@@ -58,8 +59,10 @@ const ShowListPage: FC<P> = ({
       <section className="relative min-h-[54vh] w-full overflow-hidden sm:min-h-[60vh]">
         {hasResults && featured ? (
           <>
-            <img
+            <SafeImage
               src={heroBackdrop(featured)}
+              fallbackSrc={placeholderImage}
+              fallbackVariant="poster"
               alt=""
               className="absolute inset-0 h-full w-full scale-105 object-cover object-top opacity-[0.55]"
             />

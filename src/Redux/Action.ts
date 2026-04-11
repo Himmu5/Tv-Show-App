@@ -1,4 +1,4 @@
-import { Cast } from "../Models/Cast";
+import { ShowWithEmbeddedCast } from "../Models/Cast";
 import { Episode } from "../Models/episode";
 import { PersonSearchHit } from "../Models/personSearch";
 import { ScheduleRailItem } from "../Models/schedule";
@@ -40,9 +40,11 @@ export const singleShowLoadedAction: actionCreator<Show> = (show: Show) => ({
 
 export const CAST_LOADED = "CAST_LOADED";
 
-export const castLoadedAction: actionCreator<Cast[]> = (cast: Cast[]) => ({
+export const castLoadedAction: actionCreator<ShowWithEmbeddedCast> = (
+  payload: ShowWithEmbeddedCast
+) => ({
   type: CAST_LOADED,
-  payload: cast,
+  payload,
 });
 
 export const HOME_FEED_FETCH = "HOME_FEED_FETCH";

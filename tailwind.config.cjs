@@ -57,6 +57,16 @@ module.exports = {
         250: "250ms",
         400: "400ms",
       },
+      keyframes: {
+        castReveal: {
+          from: { opacity: "0", transform: "translateY(10px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+      },
+      animation: {
+        "cast-reveal":
+          "castReveal 0.42s cubic-bezier(0.22, 1, 0.36, 1) both",
+      },
     },
   },
   plugins: [

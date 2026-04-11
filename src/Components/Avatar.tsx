@@ -1,55 +1,82 @@
-import React, { FC, useState } from 'react'
-import { connect, ConnectedProps, useSelector } from 'react-redux'
-import { castArrayMapSelector, castMapMySelector } from '../Redux/Selector/shows'
-import { State } from '../Redux/Store'
-type P = {
+import React, { FC, useState } from "react";
+import { connect, ConnectedProps, useSelector } from "react-redux";
+import { castArrayMapSelector } from "../Redux/Selector/shows";
+import { State } from "../Redux/Store";
+import { placeholderImage } from "../lib/imageFallback";
+import SafeImage from "./SafeImage";
 
-} & ReduxProps
+type P = {} & ReduxProps;
 
-type ownPropsType = { showId: number }
+type ownPropsType = { showId: number };
 
 const Avatar: FC<P> = ({ cast }) => {
+  const [show, setShow] = useState(false);
+  useSelector(castArrayMapSelector);
 
-    const [show, setShow] = useState(false);
-    const castM = useSelector(castArrayMapSelector);
+  return (
+    <div>
+      <div className="flex -space-x-4 justify-center">
+        {cast.map((Person, index) => {
+          return (
+            index < 3 && (
+              <div key={Person.id}>
+                <SafeImage
+                  src={Person.image?.medium || ""}
+                  fallbackSrc={placeholderImage}
+                  fallbackVariant="person"
+                  className="h-10 w-10 rounded-full border-2 border-white object-cover dark:border-gray-800"
+                  alt=""
+                />
+              </div>
+            )
+          );
+        })}
 
-    return <div>
-        <div className="flex -space-x-4 justify-center">
-            {
-                cast.map((Person, index) => {
-                    return index < 3 && <div key={Math.random()}>
-                        <img  className="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800" src={Person.image?.medium || " "} alt="" />
-                    </div>
-                })
-            }
-
-            {
-                show && <div className='flex flex-col gap-3 w-40 h-56 overflow-auto  scrollbar  absolute bg-black bg-opacity-90 text-white p-4 rounded-md -ml-10 mt-10 '>
-                    {
-                        cast.map((Person) => {
-                            return <div key={Person.id} onClick={() => setShow(!show)} className="text-xs flex gap-4 items-center "> <img className="w-7 h-7 border-2 border-white rounded-full dark:border-gray-800" src={Person.image?.medium || ""} alt="" /> <p>{Person.name}</p></div>
-                        })
-                    }
+        {show && (
+          <div className="absolute -ml-10 mt-10 flex h-56 w-40 flex-col gap-3 overflow-auto rounded-md bg-black bg-opacity-90 p-4 text-white scrollbar">
+            {cast.map((Person) => {
+              return (
+                <div
+                  key={Person.id}
+                  onClick={() => setShow(!show)}
+                  className="flex cursor-pointer items-center gap-4 text-xs"
+                >
+                  <SafeImage
+                    src={Person.image?.medium || ""}
+                    fallbackSrc={placeholderImage}
+                    fallbackVariant="person"
+                    className="h-7 w-7 rounded-full border-2 border-white object-cover dark:border-gray-800"
+                    alt=""
+                  />
+                  <p>{Person.name}</p>
                 </div>
-            }
+              );
+            })}
+          </div>
+        )}
 
-
-            {
-                cast.length > 3 && <button className="flex items-center justify-center w-10 h-10 text-xs font-medium text-white bg-gray-700 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" onClick={() => setShow(!show)} >+{cast.length - 3}</button>
-            }
-
-
-        </div>
-
+        {cast.length > 3 && (
+          <button
+            type="button"
+            className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-gray-700 text-xs font-medium text-white hover:bg-gray-600 dark:border-gray-800"
+            onClick={() => setShow(!show)}
+          >
+            +{cast.length - 3}
+          </button>
+        )}
+      </div>
     </div>
-}
+  );
+};
 
-let mapStateToProps = (state: State, ownProps: ownPropsType) => {
-    return { cast: castArrayMapSelector(state)[+ownProps.showId] || [] }
-}
+const mapStateToProps = (state: State, ownProps: ownPropsType) => {
+  return {
+    cast: castArrayMapSelector(state)[+ownProps.showId] || [],
+  };
+};
 
-let connector = connect(mapStateToProps);
+const connector = connect(mapStateToProps);
 
-type ReduxProps = ConnectedProps<typeof connector>
+type ReduxProps = ConnectedProps<typeof connector>;
 
 export default connector(Avatar);

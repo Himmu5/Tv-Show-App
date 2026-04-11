@@ -1,5 +1,5 @@
 import { createSelector } from "reselect";
-import { Cast, CastShow, Person } from "../../Models/Cast";
+import { CastMember, CastShow } from "../../Models/Cast";
 import { State } from "../Store";
 
 const stateSelector = (state: State) => state.show;
@@ -20,10 +20,16 @@ export const castMapMySelector = createSelector(stateSelector , (ShowState)=>{
 
 export const castArrayMapSelector = createSelector(castMapMySelector , (mapCast)=>{
   
-  const ArrayMappedCast:{ [id:number] : Person[] } = Object.keys(mapCast).reduce((prev , current )=>{
-    
-    return { ...prev , [current] : Object.keys(mapCast[+current]).map((id)=>mapCast[+current][+id] )  }
-  },{})
+  const ArrayMappedCast: { [id: number]: CastMember[] } = Object.keys(
+    mapCast
+  ).reduce((prev, current) => {
+    return {
+      ...prev,
+      [current]: Object.keys(mapCast[+current]).map(
+        (id) => mapCast[+current][+id]
+      ),
+    };
+  }, {});
   return ArrayMappedCast;
 });
 

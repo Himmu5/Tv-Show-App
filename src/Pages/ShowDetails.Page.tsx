@@ -1,4 +1,4 @@
-import { FC, useEffect } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import CastCard from "../Components/CastCard";
 import GenrePill from "../Components/GenrePill";
 import withRouter, { WithRouterProps } from "../hocs/withRouter";
@@ -19,8 +19,9 @@ import {
 } from "../Redux/Action";
 import LoadingSpinner from "../Components/LoadingSpinner";
 import { ShowDetailSkeleton } from "../Components/Skeletons";
-import { placeholderImage } from "../Components/ShowCard";
-import { IoChevronBack } from "react-icons/io5";
+import SafeImage from "../Components/SafeImage";
+import { placeholderImage } from "../lib/imageFallback";
+import { IoChevronBack, IoChevronDown, IoChevronUp } from "react-icons/io5";
 import { Link } from "react-router-dom";
 import { stripHtml } from "../lib/stripHtml";
 
@@ -28,8 +29,10 @@ type ShowDetailPageProps = ownProps & ReduxProps;
 type ownProps = {} & WithRouterProps;
 
 function backdropSrc(medium?: string, original?: string): string {
-  return original || medium || placeholderImage;
+  return original || medium || "";
 }
+
+const CAST_PREVIEW_COUNT = 8;
 
 const ShowDetailPage: FC<ShowDetailPageProps> = ({
   singleShowLoading,
@@ -41,6 +44,13 @@ const ShowDetailPage: FC<ShowDetailPageProps> = ({
   episodesData,
   episodesLoading,
 }) => {
+  const [castExpanded, setCastExpanded] = useState(false);
+  const castListRef = useRef<HTMLUListElement>(null);
+
+  useEffect(() => {
+    setCastExpanded(false);
+  }, [showId]);
+
   useEffect(() => {
     singleShowLoading(showId);
   }, [showId, singleShowLoading]);
@@ -57,12 +67,34 @@ const ShowDetailPage: FC<ShowDetailPageProps> = ({
   const rating =
     show.rating?.average != null ? `${show.rating.average}/10` : "—";
   const synopsis = stripHtml(show.summary);
+  const castHasMore = cast.length > CAST_PREVIEW_COUNT;
+  const visibleCast = castExpanded
+    ? cast
+    : cast.slice(0, CAST_PREVIEW_COUNT);
+  const hiddenCount = cast.length - CAST_PREVIEW_COUNT;
+
+  const toggleCastExpanded = () => {
+    setCastExpanded((prev) => {
+      const next = !prev;
+      if (!prev && next) {
+        requestAnimationFrame(() => {
+          castListRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+          });
+        });
+      }
+      return next;
+    });
+  };
 
   return (
     <div className="min-h-screen bg-surface pb-20">
       <div className="relative min-h-[72vh] w-full overflow-hidden sm:min-h-[78vh]">
-        <img
+        <SafeImage
           src={backdropSrc(img?.medium, img?.original)}
+          fallbackSrc={placeholderImage}
+          fallbackVariant="poster"
           alt=""
           className="absolute inset-0 h-full w-full scale-105 object-cover object-top"
         />
@@ -127,29 +159,108 @@ const ShowDetailPage: FC<ShowDetailPageProps> = ({
           />
         </section>
 
-        <section className="panel-glass mt-8 p-6 sm:p-8">
-          <div className="mb-6">
-            <h2 className="text-xl font-extrabold tracking-tight text-white sm:text-2xl">
-              Cast
-            </h2>
-            <div className="mt-2 h-0.5 w-11 rounded-full bg-gradient-to-r from-brand to-transparent shadow-glow" />
-          </div>
-          {cast.length === 0 ? (
-            <p className="text-sm text-zinc-500">
-              Cast isn&apos;t available for this title yet.
-            </p>
-          ) : (
-            <div className="row-scroll -mx-1 px-1 pt-1">
-              {cast.map((item) => (
-                <CastCard
-                  key={item.id}
-                  avatarLink={item.image?.medium || placeholderImage}
-                  name={item.name || "Unknown"}
-                />
-              ))}
+        <div className="viewport-bleed-x">
+          <section
+            className="panel-glass mt-8 rounded-none border-x-0 py-6 sm:py-8"
+            aria-labelledby="cast-heading"
+          >
+            <div className="mb-5 px-4 sm:mb-6 sm:px-6 lg:px-10">
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <h2
+                    id="cast-heading"
+                    className="text-xl font-extrabold tracking-tight text-white sm:text-2xl"
+                  >
+                    Cast
+                  </h2>
+                  <div className="mt-2 h-0.5 w-11 rounded-full bg-gradient-to-r from-brand to-transparent shadow-glow" />
+                  {cast.length > 0 && (
+                    <p className="mt-3 text-sm text-zinc-500">
+                      {castExpanded
+                        ? `${cast.length} ${cast.length === 1 ? "person" : "people"}`
+                        : castHasMore
+                          ? `Showing ${Math.min(CAST_PREVIEW_COUNT, cast.length)} of ${cast.length}`
+                          : `${cast.length} ${cast.length === 1 ? "person" : "people"}`}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
-          )}
-        </section>
+            {cast.length === 0 ? (
+              <p className="px-4 text-sm text-zinc-500 sm:px-6 lg:px-10">
+                Cast isn&apos;t available for this title yet.
+              </p>
+            ) : (
+              <>
+                <ul
+                  id="cast-list"
+                  ref={castListRef}
+                  className={`list-none pt-1 ${
+                    castExpanded
+                      ? "flex flex-wrap gap-3 px-4 sm:gap-4 sm:px-6 lg:px-10"
+                      : "grid w-full grid-cols-2 gap-2 px-4 sm:grid-cols-5 sm:gap-3 sm:px-6 md:gap-4 lg:px-10"
+                  }`}
+                  aria-label="Cast"
+                >
+                  {visibleCast.map((item, index) => (
+                    <li
+                      key={item.id}
+                      className={
+                        castExpanded
+                          ? "shrink-0 list-none"
+                          : "min-w-0 list-none"
+                      }
+                    >
+                      <CastCard
+                        fillRow={!castExpanded}
+                        characterName={item.characterName}
+                        avatarLink={item.image?.medium || ""}
+                        name={item.name || "Unknown"}
+                        revealStagger={
+                          castExpanded && index >= CAST_PREVIEW_COUNT
+                            ? index - CAST_PREVIEW_COUNT
+                            : undefined
+                        }
+                      />
+                    </li>
+                  ))}
+                </ul>
+                {castHasMore && (
+                  <div className="px-4 sm:px-6 lg:px-10">
+                    <button
+                      type="button"
+                      className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-zinc-100 shadow-inner-glow backdrop-blur-sm transition hover:border-white/18 hover:bg-white/[0.08] sm:w-auto sm:justify-start"
+                      aria-expanded={castExpanded}
+                      aria-controls="cast-list"
+                      onClick={toggleCastExpanded}
+                    >
+                      {castExpanded ? (
+                        <>
+                          Show less
+                          <IoChevronUp
+                            className="h-4 w-4 shrink-0 text-brand"
+                            aria-hidden
+                          />
+                        </>
+                      ) : (
+                        <>
+                          Show all cast
+                          <span className="tabular-nums text-zinc-400">
+                            ({hiddenCount} more)
+                          </span>
+                          <IoChevronDown
+                            className="h-4 w-4 shrink-0 text-brand"
+                            aria-hidden
+                          />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </section>
+        </div>
 
         <div className="mt-16">
           <TVmazeCredit />

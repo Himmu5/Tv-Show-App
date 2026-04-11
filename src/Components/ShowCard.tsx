@@ -1,15 +1,16 @@
 import { FC } from "react";
 import { Link } from "react-router-dom";
+import { placeholderImage } from "../lib/imageFallback";
 import { Show } from "../Models/showType";
 import { stripHtml } from "../lib/stripHtml";
+import SafeImage from "./SafeImage";
 
-export const placeholderImage =
-  "https://wikitechlibrary.com/ezoimgfmt/i0.wp.com/wikitechlibrary.com/hub/wp-content/uploads/2022/11/entertainment-hub.webp?ezimgfmt=ng%3Awebp%2Fngcb1%2Frs%3Adevice%2Frscb1-2&ssl=1&w=771";
+export { placeholderImage } from "../lib/imageFallback";
 
 type P = { Show: Show };
 
 function posterSrc(show: Show): string {
-  return show.image?.original || show.image?.medium || placeholderImage;
+  return show.image?.original || show.image?.medium || "";
 }
 
 const ShowCard: FC<P> = ({ Show: show }) => {
@@ -24,8 +25,10 @@ const ShowCard: FC<P> = ({ Show: show }) => {
       className="poster-card group w-[142px] sm:w-[164px] md:w-[184px]"
     >
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-zinc-950">
-        <img
+        <SafeImage
           src={posterSrc(show)}
+          fallbackSrc={placeholderImage}
+          fallbackVariant="poster"
           alt=""
           className="h-full w-full object-cover object-center transition-transform duration-500 ease-crisp group-hover:scale-110"
           loading="lazy"

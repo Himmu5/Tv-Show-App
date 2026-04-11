@@ -1,12 +1,13 @@
 import { FC, memo } from "react";
 import { Link } from "react-router-dom";
+import { placeholderImage } from "../lib/imageFallback";
 import { ScheduleRailItem } from "../Models/schedule";
-import { placeholderImage } from "./ShowCard";
+import SafeImage from "./SafeImage";
 
 type P = { item: ScheduleRailItem };
 
 function poster(s: ScheduleRailItem["show"]): string {
-  return s.image?.original || s.image?.medium || placeholderImage;
+  return s.image?.original || s.image?.medium || "";
 }
 
 const ScheduleShowCard: FC<P> = ({ item }) => {
@@ -21,8 +22,10 @@ const ScheduleShowCard: FC<P> = ({ item }) => {
       className="poster-card group w-[142px] sm:w-[164px] md:w-[184px]"
     >
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-zinc-950">
-        <img
+        <SafeImage
           src={poster(show)}
+          fallbackSrc={placeholderImage}
+          fallbackVariant="poster"
           alt=""
           className="h-full w-full object-cover object-center transition-transform duration-500 ease-crisp group-hover:scale-110"
           loading="lazy"
