@@ -1,52 +1,52 @@
 import { FC } from "react";
-import { connect, ConnectedProps } from "react-redux";
 import { Link } from "react-router-dom";
-import { Cast } from "../Models/Cast";
 import { Show } from "../Models/showType";
-import { castMapMySelector } from "../Redux/Selector/shows";
-import { State } from "../Redux/Store";
-import Avatar from "./Avatar";
+import { stripHtml } from "../lib/stripHtml";
 
-type P = {
-  Show:Show
-} & ReduxProps
+export const placeholderImage =
+  "https://wikitechlibrary.com/ezoimgfmt/i0.wp.com/wikitechlibrary.com/hub/wp-content/uploads/2022/11/entertainment-hub.webp?ezimgfmt=ng%3Awebp%2Fngcb1%2Frs%3Adevice%2Frscb1-2&ssl=1&w=771";
 
+type P = { Show: Show };
 
-export const placeholderImage = "https://wikitechlibrary.com/ezoimgfmt/i0.wp.com/wikitechlibrary.com/hub/wp-content/uploads/2022/11/entertainment-hub.webp?ezimgfmt=ng%3Awebp%2Fngcb1%2Frs%3Adevice%2Frscb1-2&ssl=1&w=771"
-
-
-const ShowCard: FC<P> = ({ Show }) => {
-  
-  return (
-    <div className="max-w-xs rounded-md shadow-md p-2 m-1">
-      <img
-        src={ Show.image?.medium ||  placeholderImage}
-        alt=""
-        className="object-cover object-center w-full rounded-t-md h-72"
-      />
-      <div className="flex flex-col justify-between p-6 space-y-8">
-        <div className="space-y-2">
-          <h2 className="text-3xl font-semibold tracking-wide ">{Show.name}</h2>
-          <p dangerouslySetInnerHTML={{__html: Show.summary || ""}} className="scrollbar-w-1 scrollbar-h-6 scrollbar-thumb-gray-400 scrollbar-track-rounded-3xl  scrollbar-thin h-44">
-          </p>
-        </div>
-        
-
-        <Avatar showId={Show.id} />
-
-        <Link
-          to={"/show/"+Show.id}
-          className="flex items-center justify-center w-full p-3 font-semibold tracking-wide rounded-md border-2  border-gray-400"
-        >
-          View Details
-        </Link>
-      </div>
-    </div>
-  );
+function posterSrc(show: Show): string {
+  return show.image?.original || show.image?.medium || placeholderImage;
 }
 
+const ShowCard: FC<P> = ({ Show: show }) => {
+  const teaser = stripHtml(show.summary);
+  const blurb = teaser.length > 120 ? `${teaser.slice(0, 120)}…` : teaser;
+  const rating =
+    show.rating?.average != null ? `${show.rating.average}/10` : null;
 
+  return (
+    <Link
+      to={`/show/${show.id}`}
+      className="group relative block w-[140px] shrink-0 overflow-hidden rounded-md bg-surface-elevated shadow-card transition duration-300 ease-out hover:z-20 hover:scale-105 hover:shadow-card-hover sm:w-[160px] md:w-[180px]"
+    >
+      <div className="relative aspect-[2/3] w-full overflow-hidden bg-zinc-900">
+        <img
+          src={posterSrc(show)}
+          alt=""
+          className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-110"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-card-shine opacity-90 transition group-hover:opacity-100" />
+        <div className="absolute inset-x-0 bottom-0 p-2 sm:p-3">
+          <h2 className="line-clamp-2 text-sm font-semibold leading-tight text-white drop-shadow-md sm:text-base">
+            {show.name}
+          </h2>
+          {rating && (
+            <p className="mt-1 text-xs font-medium text-green-400">{rating}</p>
+          )}
+          {blurb && (
+            <p className="mt-2 line-clamp-3 text-xs leading-snug text-zinc-300 opacity-0 transition duration-200 group-hover:opacity-100">
+              {blurb}
+            </p>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+};
 
-let connector = connect(null);
-type ReduxProps =   ConnectedProps<typeof connector>
-export default connector(ShowCard);
+export default ShowCard;

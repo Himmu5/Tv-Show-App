@@ -2,11 +2,16 @@ import { FC } from "react";
 import { ImSpinner } from "react-icons/im";
 
 type P = {
-  className?:string
-}
+  className?: string;
+};
 
-const LoadingSpinner:FC<P> = ({ className }) => {
-  return <ImSpinner size={30} className={`animate-spin ${className}`} />;
+const LoadingSpinner: FC<P> = ({ className }) => {
+  return (
+    <ImSpinner
+      className={`animate-spin text-brand ${className ?? "h-8 w-8"}`}
+      aria-hidden
+    />
+  );
 };
 
 export default LoadingSpinner;

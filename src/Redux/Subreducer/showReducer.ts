@@ -2,9 +2,20 @@ import produce from "immer";
 import { normalize, schema } from "normalizr";
 import { AnyAction } from "redux";
 import { Cast, CastShow, showCastType } from "../../Models/Cast";
+import { Episode } from "../../Models/episode";
+import { PersonSearchHit } from "../../Models/personSearch";
+import { ScheduleRailItem } from "../../Models/schedule";
 import { NormalizedShow, Show } from "../../Models/showType";
 import {
   CAST_LOADED,
+  EPISODES_FAILURE,
+  EPISODES_FETCH,
+  EPISODES_SUCCESS,
+  HOME_FEED_FAILURE,
+  HOME_FEED_FETCH,
+  HOME_FEED_SUCCESS,
+  PEOPLE_QUERY_CHANGE,
+  PEOPLE_SEARCH_SUCCESS,
   QUERY_CHANGE,
   SHOWS_LOADED,
   SINGLE_SHOW_LOADED,
@@ -16,7 +27,22 @@ export type ShowState = {
   query: string;
   query_shows: { [query: string]: number[] };
   loading: boolean;
-  cast: CastShow
+  cast: CastShow;
+  homeFeed: {
+    loading: boolean;
+    error: string | null;
+    loaded: boolean;
+    tvRows: ScheduleRailItem[];
+    webRows: ScheduleRailItem[];
+    discoverIds: number[];
+  };
+  people: {
+    query: string;
+    results: PersonSearchHit[];
+    loading: boolean;
+  };
+  episodesByShowId: { [showId: number]: Episode[] };
+  episodesLoadingId: number | null;
 };
 
 let initialShowState: ShowState = {
@@ -25,6 +51,21 @@ let initialShowState: ShowState = {
   query_shows: {},
   cast: {},
   loading: false,
+  homeFeed: {
+    loading: false,
+    error: null,
+    loaded: false,
+    tvRows: [],
+    webRows: [],
+    discoverIds: [],
+  },
+  people: {
+    query: "",
+    results: [],
+    loading: false,
+  },
+  episodesByShowId: {},
+  episodesLoadingId: null,
 };
 
 
@@ -92,6 +133,74 @@ export function showReducer(
         draft.cast = {...draft.cast , [action.payload.id] : NormalizedCast.entities.person! } || {};
         draft.loading = false;
       });
+
+    case HOME_FEED_FETCH:
+      return produce(showState, (draft) => {
+        draft.homeFeed.loading = true;
+        draft.homeFeed.error = null;
+      });
+
+    case HOME_FEED_SUCCESS:
+      return produce(showState, (draft) => {
+        draft.homeFeed.loading = false;
+        draft.homeFeed.error = null;
+        draft.homeFeed.loaded = true;
+        const p = action.payload as {
+          tvRows: ScheduleRailItem[];
+          webRows: ScheduleRailItem[];
+          discoverIds: number[];
+          mergedShows: Show[];
+        };
+        draft.homeFeed.tvRows = p.tvRows;
+        draft.homeFeed.webRows = p.webRows;
+        draft.homeFeed.discoverIds = p.discoverIds;
+        for (const s of p.mergedShows) {
+          draft.shows[s.id] = { ...draft.shows[s.id], ...s } as Show;
+        }
+      });
+
+    case HOME_FEED_FAILURE:
+      return produce(showState, (draft) => {
+        draft.homeFeed.loading = false;
+        draft.homeFeed.error = action.payload as string;
+      });
+
+    case PEOPLE_QUERY_CHANGE:
+      return produce(showState, (draft) => {
+        draft.people.query = action.payload;
+        draft.people.loading = true;
+      });
+
+    case PEOPLE_SEARCH_SUCCESS:
+      return produce(showState, (draft) => {
+        draft.people.results = action.payload as PersonSearchHit[];
+        draft.people.loading = false;
+      });
+
+    case EPISODES_FETCH:
+      return produce(showState, (draft) => {
+        draft.episodesLoadingId = +(action.payload as string);
+      });
+
+    case EPISODES_SUCCESS:
+      return produce(showState, (draft) => {
+        const { showId, episodes } = action.payload as {
+          showId: number;
+          episodes: Episode[];
+        };
+        draft.episodesByShowId[showId] = episodes;
+        draft.episodesLoadingId = null;
+      });
+
+    case EPISODES_FAILURE:
+      return produce(showState, (draft) => {
+        const id = action.payload as number;
+        draft.episodesLoadingId = null;
+        if (id && draft.episodesByShowId[id] === undefined) {
+          draft.episodesByShowId[id] = [];
+        }
+      });
+
     default:
       return showState;
   }

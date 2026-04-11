@@ -4,77 +4,150 @@ import GenrePill from "../Components/GenrePill";
 import withRouter, { WithRouterProps } from "../hocs/withRouter";
 import { connect, ConnectedProps } from "react-redux/es/exports";
 import { State } from "../Redux/Store";
-import { castArrayMapSelector, loadingSelector, showMapSelector } from "../Redux/Selector/shows";
-import { singleShowLoadingAction } from "../Redux/Action";
+import {
+  castArrayMapSelector,
+  episodesForShowSelector,
+  episodesLoadingIdSelector,
+  loadingSelector,
+  showMapSelector,
+} from "../Redux/Selector/shows";
+import EpisodeGuide from "../Components/EpisodeGuide";
+import TVmazeCredit from "../Components/TVmazeCredit";
+import {
+  episodesFetchAction,
+  singleShowLoadingAction,
+} from "../Redux/Action";
 import LoadingSpinner from "../Components/LoadingSpinner";
 import { placeholderImage } from "../Components/ShowCard";
-import { IoArrowBackCircleOutline } from 'react-icons/io5'
+import { IoChevronBack } from "react-icons/io5";
 import { Link } from "react-router-dom";
+import { stripHtml } from "../lib/stripHtml";
 
-type ShowDetailPageProps = ownProps & ReduxProps
-type ownProps = {} & WithRouterProps
+type ShowDetailPageProps = ownProps & ReduxProps;
+type ownProps = {} & WithRouterProps;
 
-const ShowDetailPage: FC<ShowDetailPageProps> = ({ singleShowLoading, showId, show, cast, loading }) => {
+function backdropSrc(medium?: string, original?: string): string {
+  return original || medium || placeholderImage;
+}
 
+const ShowDetailPage: FC<ShowDetailPageProps> = ({
+  singleShowLoading,
+  loadEpisodes,
+  showId,
+  show,
+  cast,
+  loading,
+  episodesData,
+  episodesLoading,
+}) => {
   useEffect(() => {
     singleShowLoading(showId);
-  }, [showId])
+  }, [showId, singleShowLoading]);
 
-
+  useEffect(() => {
+    loadEpisodes(showId);
+  }, [showId, loadEpisodes]);
 
   if (!show) {
-    return <div className="flex justify-center items-center flex-col h-screen " ><LoadingSpinner /></div>
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-black">
+        <LoadingSpinner className="h-12 w-12" />
+        <p className="text-sm text-zinc-500">Loading show…</p>
+      </div>
+    );
   }
 
+  const img = show.image;
+  const rating =
+    show.rating?.average != null ? `${show.rating.average}/10` : "—";
+  const synopsis = stripHtml(show.summary);
+
   return (
-    <div className="mt-2 flex flex-col">
-
-      <div className="flex gap-2 items-center ">
-        <h2 className="text-4xl font-semibold tracking-wide">{show.name}</h2>
-        {loading && <LoadingSpinner />}
-      </div>
-      <div className="flex space-x-3 my-2 bg-gray-300 p-2 rounded-sm">
-        {
-          show.genres.map((item: string, index: number) => {
-            return <GenrePill key={index} name={item} />
-          })
-        }
-
-
-      </div>
-      <Link to="/" className="hover:text-gray-400 self-start flex gap-1 items-center font-bold "><IoArrowBackCircleOutline size={30} /> <p>back</p></Link>
-      <div className="mt-2 flex">
+    <div className="min-h-screen bg-black pb-20">
+      <div className="relative min-h-[70vh] w-full overflow-hidden sm:min-h-[75vh]">
         <img
-          src={show.image?.medium || placeholderImage}
+          src={backdropSrc(img?.medium, img?.original)}
           alt=""
-          className="object-cover object-center w-full rounded-t-md h-72"
+          className="absolute inset-0 h-full w-full object-cover object-top"
         />
-        <div className="ml-2">
-          <p dangerouslySetInnerHTML={{ __html: show.summary }}>
+        <div className="absolute inset-0 bg-hero-vignette" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
 
-          </p>
-          <p className="mt-2 text-lg font-bold border border-gray-700 rounded-md px-2 py-1 max-w-max">
-            Rating: <span className="text-gray-700">{show.rating.average === null ? "null" : show.rating.average}/10</span>
-          </p>
+        <div className="safe-pad-top relative z-10 px-4 pt-4 sm:px-6 lg:px-10">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1 text-sm font-medium text-zinc-300 transition hover:text-white"
+          >
+            <IoChevronBack className="h-5 w-5" aria-hidden />
+            Back to browse
+          </Link>
+        </div>
+
+        <div className="relative z-10 flex min-h-[55vh] flex-col justify-end px-4 pb-12 pt-8 sm:min-h-[60vh] sm:px-6 lg:px-10">
+          <div className="flex flex-wrap gap-2">
+            {show.genres?.map((item: string) => (
+              <GenrePill key={item} name={item} />
+            ))}
+          </div>
+          <div className="mt-4 flex items-start gap-4">
+            <h1 className="max-w-4xl font-display text-5xl font-extrabold leading-none tracking-tight text-white sm:text-6xl md:text-7xl">
+              {show.name}
+            </h1>
+            {loading && (
+              <LoadingSpinner className="mt-2 h-8 w-8 shrink-0 text-brand" />
+            )}
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-zinc-300">
+            <span className="rounded border border-white/20 bg-black/40 px-3 py-1 font-semibold text-green-400 backdrop-blur-sm">
+              {rating === "—" ? "No score" : `${rating} average`}
+            </span>
+            {show.language && (
+              <span className="text-zinc-400">{show.language}</span>
+            )}
+            {show.type && (
+              <span className="uppercase tracking-wider text-zinc-500">
+                {show.type}
+              </span>
+            )}
+          </div>
+          {synopsis && (
+            <p className="mt-6 max-w-3xl text-base leading-relaxed text-zinc-200 sm:text-lg">
+              {synopsis}
+            </p>
+          )}
         </div>
       </div>
 
-      <div className="mt-2">
-        <h4 className="text-2xl font-semibold tracking-wide">Cast</h4>
-        <div className="flex flex-wrap">
-          {
-            cast.map((item) => {
-              return <CastCard
-                key={Math.random()}
-                avatarLink={item.image?.medium || placeholderImage}
-                name={item.name || "Unknown"}
-              />
-            })
-          }
-          {
-            cast.length == 0 && <div className="text-2xl my-5 font-bold text-gray-600 ">CAST NOT AVALABLE</div>
-          }
+      <div className="relative z-20 -mt-4 px-4 sm:px-6 lg:px-10">
+        <section className="mt-10">
+          <h2 className="mb-4 text-lg font-semibold text-white sm:text-xl">
+            Episodes
+          </h2>
+          <EpisodeGuide
+            episodes={episodesData ?? []}
+            loading={episodesLoading && episodesData === undefined}
+          />
+        </section>
 
+        <section className="mt-10">
+          <h2 className="mb-4 text-lg font-semibold text-white sm:text-xl">Cast</h2>
+          {cast.length === 0 ? (
+            <p className="text-zinc-500">Cast isn’t available for this title yet.</p>
+          ) : (
+            <div className="row-scroll -mx-1 px-1">
+              {cast.map((item) => (
+                <CastCard
+                  key={item.id}
+                  avatarLink={item.image?.medium || placeholderImage}
+                  name={item.name || "Unknown"}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+
+        <div className="mt-16">
+          <TVmazeCredit />
         </div>
       </div>
     </div>
@@ -82,15 +155,24 @@ const ShowDetailPage: FC<ShowDetailPageProps> = ({ singleShowLoading, showId, sh
 };
 
 const mapStateToProps = (state: State, ownState: ownProps) => {
-  return { show: showMapSelector(state)[+ownState.params.showId], showId: ownState.params.showId, cast: castArrayMapSelector(state)[+ownState.params.showId] || [], loading: loadingSelector(state) }
-}
+  const id = +ownState.params.showId;
+  return {
+    show: showMapSelector(state)[id],
+    showId: ownState.params.showId,
+    cast: castArrayMapSelector(state)[id] || [],
+    loading: loadingSelector(state),
+    episodesData: episodesForShowSelector(state, id),
+    episodesLoading: episodesLoadingIdSelector(state) === id,
+  };
+};
 
 const mapDispatchToProps = {
-  singleShowLoading: singleShowLoadingAction
-}
+  singleShowLoading: singleShowLoadingAction,
+  loadEpisodes: episodesFetchAction,
+};
 
-let connector = connect(mapStateToProps, mapDispatchToProps);
+const connector = connect(mapStateToProps, mapDispatchToProps);
 
-type ReduxProps = ConnectedProps<typeof connector>
+type ReduxProps = ConnectedProps<typeof connector>;
 
 export default withRouter(connector(ShowDetailPage));

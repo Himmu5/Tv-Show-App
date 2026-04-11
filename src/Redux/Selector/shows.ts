@@ -60,3 +60,44 @@ export const castSelector = createSelector(castMapSelector, (castMap) => {
   });
   return data;
 });
+
+export const homeFeedSelector = createSelector(
+  stateSelector,
+  (s) => s.homeFeed
+);
+
+export const discoverShowsSelector = createSelector(
+  showMapSelector,
+  homeFeedSelector,
+  (map, hf) =>
+    hf.discoverIds.map((id) => map[id]).filter(Boolean)
+);
+
+export const peopleSelector = createSelector(
+  stateSelector,
+  (s) => s.people
+);
+
+export const peopleQuerySelector = createSelector(
+  peopleSelector,
+  (p) => p.query
+);
+
+export const peopleResultsSelector = createSelector(
+  peopleSelector,
+  (p) => p.results
+);
+
+export const peopleLoadingSelector = createSelector(
+  peopleSelector,
+  (p) => p.loading
+);
+
+/** `undefined` = not loaded yet; array = loaded (possibly empty). */
+export const episodesForShowSelector = (state: State, showId: number) =>
+  state.show.episodesByShowId[showId];
+
+export const episodesLoadingIdSelector = createSelector(
+  stateSelector,
+  (s) => s.episodesLoadingId
+);
